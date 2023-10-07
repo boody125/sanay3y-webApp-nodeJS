@@ -5,12 +5,20 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 const passport = require("passport");
 const User =require('./models/User')
+const login=require('./routes/login')
+const register=require('./routes/register')
+const logout=require('./routes/logout')
 require('dotenv').config();
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  credentials:true,
+  origin:"http://localhost:3000",
+  
+}));
 app.use(express.json());
 app.use(session({
+  httpOnly:false,
   secret:"SomeValue",
   resave: false,
   saveUninitialized: false
@@ -22,53 +30,11 @@ const uri = process.env.MONGO_URL
 mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true} );
 
 
-app.post("/Register", async function(req, res){
+app.use(register)
 
-  const {firstname,lastname,email,password}=req.body
-  try {
-    const userRegisterDoc = await User.register({firstname:firstname,
-      lastname: lastname,
-      email: email,
-      provider: 'local'}, password,
-      passport.authenticate("local")(req, res, function(){
-        //Redirect them to the HomePage
-        
-        console.log("Successfully Registered");
-      })
-    )
-    res.json(userRegisterDoc)
-  } 
-    
-  catch (error) {
-      console.log(error)
-      res.status(422).json(error)
-      
-    }
-  }
-);
+app.use(login)
 
-
-
-app.post("/Login", function(req, res){
-  const {email,password}=req.body
-
-  try {
-    const userLoginDoc=req.login({email: email,
-      password: password},function(){
-      passport.authenticate("local")(req, res, function(){
-        res.json(userLoginDoc)
-        console.log("Successfully Logged in");
-
-      });
-    })
-  } 
-  catch (error) {
-    res.status(422).json(error)
-  }
-  
-  }
-);
-
+app.use(logout)
 
 
 app.listen(8080, ()=>{
