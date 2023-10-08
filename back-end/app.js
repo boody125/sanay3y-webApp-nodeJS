@@ -3,19 +3,25 @@ const express= require("express");
 const cors = require("cors")
 const mongoose = require("mongoose");
 const session = require('express-session');
+const cookieParser= require('cookie-parser')
 const passport = require("passport");
 const User =require('./models/User')
 const login=require('./routes/login')
 const register=require('./routes/register')
 const logout=require('./routes/logout')
+const profile=require('./routes/profile')
+const mockApi=require('./routes/mockApi')
+
 require('dotenv').config();
 const app = express();
+
 
 app.use(cors({
   credentials:true,
   origin:"http://localhost:3000",
   
 }));
+app.use(cookieParser())
 app.use(express.json());
 app.use(session({
   httpOnly:false,
@@ -36,6 +42,9 @@ app.use(login)
 
 app.use(logout)
 
+app.use(profile)
+
+app.use(mockApi)
 
 app.listen(8080, ()=>{
   console.log('Server 8080 is running up !!')
